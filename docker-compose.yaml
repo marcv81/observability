@@ -1,0 +1,16 @@
+services:
+
+  grafana:
+    image: "grafana/grafana:13.1.4"
+    volumes:
+      - "grafana-data:/var/lib/grafana"
+    ports:
+      - "127.0.0.1:5000:3000"
+    restart: "unless-stopped"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+
+volumes:
+  grafana-data: {}
