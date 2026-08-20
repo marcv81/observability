@@ -4,6 +4,7 @@ services:
     image: "grafana/grafana:13.1.4"
     volumes:
       - "grafana-data:/var/lib/grafana"
+      - "./grafana-provisioning:/etc/grafana/provisioning:ro"
     ports:
       - "127.0.0.1:5000:3000"
     restart: "unless-stopped"
@@ -12,5 +13,14 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_DISABLE_LOGIN_FORM=true
 
+  victoria-metrics:
+    image: "victoriametrics/victoria-metrics:v1.150.0"
+    volumes:
+      - "victoria-metrics-data:/victoria-metrics-data"
+    restart: "unless-stopped"
+    command:
+      - "--retentionPeriod=100y"
+
 volumes:
   grafana-data: {}
+  victoria-metrics-data: {}
