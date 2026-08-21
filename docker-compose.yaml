@@ -21,6 +21,15 @@ services:
     command:
       - "--retentionPeriod=100y"
 
+  otel-collector:
+    image: "otel/opentelemetry-collector-contrib:0.159.0"
+    volumes:
+      - "./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro"
+    ports:
+      - "127.0.0.1:4317:4317"
+      - "127.0.0.1:4318:4318"
+    restart: "unless-stopped"
+
 volumes:
   grafana-data: {}
   victoria-metrics-data: {}
