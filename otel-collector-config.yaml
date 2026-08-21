@@ -12,8 +12,14 @@ exporters:
     resource_to_telemetry_conversion:
       enabled: true
 
+  otlphttp/logs:
+    endpoint: http://loki:3100/otlp
+
 service:
   pipelines:
     metrics:
       receivers: [otlp]
       exporters: [prometheusremotewrite]
+    logs:
+      receivers: [otlp]
+      exporters: [otlphttp/logs]

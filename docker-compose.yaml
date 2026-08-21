@@ -21,6 +21,14 @@ services:
     command:
       - "--retentionPeriod=100y"
 
+  loki:
+    image: "grafana/loki:3.7.6"
+    volumes:
+      - "loki-data:/loki"
+    restart: "unless-stopped"
+    command:
+      - "-config.file=/etc/loki/local-config.yaml"
+
   otel-collector:
     image: "otel/opentelemetry-collector-contrib:0.159.0"
     volumes:
@@ -33,3 +41,4 @@ services:
 volumes:
   grafana-data: {}
   victoria-metrics-data: {}
+  loki-data: {}
