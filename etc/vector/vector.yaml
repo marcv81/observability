@@ -1,0 +1,66 @@
+api:
+  enabled: true
+
+sources:
+  journald:
+    type: journald
+
+transforms:
+  journald_to_otlp:
+    type: remap
+    inputs: [journald]
+    source: |
+
+      # Extract journald metadata.
+      data = .
+      del(data.host)
+      del(data.message)
+      del(data.timestamp)
+      attributes = []
+      for_each(data) -> |key, value| {
+        attributes = push(attributes, {"key": key, "value": {"stringValue": value}})
+      }
+
+      # Map from journald priority to OTEL severity.
+      # Reference: https://docs.rsyslog.com/doc/configuration/modules/omotel.html
+      severity_text = "UNSPECIFIED"
+      severity_number = 0
+      priority = to_int(.PRIORITY) ?? 6 # Default = INFO
+      if priority == 0 { severity_text = "FATAL"; severity_number = 24 }
+      else if priority == 1 { severity_text = "FATAL"; severity_number = 23 }
+      else if priority == 2 { severity_text = "FATAL"; severity_number = 22 }
+      else if priority == 3 { severity_text = "ERROR"; severity_number = 17 }
+      else if priority == 4 { severity_text = "WARN"; severity_number = 13 }
+      else if priority == 5 { severity_text = "INFO"; severity_number = 11 }
+      else if priority == 6 { severity_text = "INFO"; severity_number = 9 }
+      else if priority == 7 { severity_text = "DEBUG"; severity_number = 5 }
+
+      # Convert to OTLP.
+      . = {
+        "resourceLogs": [{
+          "resource": { "attributes": [
+            {"key": "service.name", "value": {"stringValue": "vector"}},
+            {"key": "host.name", "value": {"stringValue": .host}}
+          ]},
+          "scopeLogs": [{
+            "scope": {"name": "vector.journald", "version": ""},
+            "logRecords": [{
+              "timeUnixNano": to_unix_timestamp!(.timestamp, "nanoseconds"),
+              "severityNumber": severity_number,
+              "severityText": severity_text,
+              "body": {"stringValue": .message},
+              "attributes": attributes
+            }]
+          }]
+        }]
+      }
+
+sinks:
+  otel:
+    type: opentelemetry
+    inputs: [journald_to_otlp]
+    protocol:
+      type: http
+      uri: http://localhost:4318/v1/logs
+      encoding:
+        codec: otlp
