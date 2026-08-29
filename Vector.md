@@ -20,7 +20,7 @@ Install Vector.
 
 Install the configuration.
 
-    sudo cp etc/vector/vector.yaml /etc/vector/vector.yaml
+    sudo cp config/vector/vector.yaml /etc/vector/vector.yaml
 
 Start and enable the service.
 

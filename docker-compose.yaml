@@ -4,7 +4,7 @@ services:
     image: "grafana/grafana:13.1.4"
     volumes:
       - "grafana-data:/var/lib/grafana"
-      - "./grafana-provisioning:/etc/grafana/provisioning:ro"
+      - "./config/grafana/provisioning:/etc/grafana/provisioning:ro"
     ports:
       - "127.0.0.1:5000:3000"
     restart: "unless-stopped"
@@ -32,7 +32,7 @@ services:
   otel-collector:
     image: "otel/opentelemetry-collector-contrib:0.159.0"
     volumes:
-      - "./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro"
+      - "./config/otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro"
     ports:
       - "127.0.0.1:4317:4317"
       - "127.0.0.1:4318:4318"
