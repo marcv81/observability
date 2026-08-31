@@ -1,0 +1,9 @@
+severity_text,severity_number
+"trace",1
+"debug",5
+"info",9
+"warn",13
+"warning",13
+"err",17
+"error",17
+"fatal",21

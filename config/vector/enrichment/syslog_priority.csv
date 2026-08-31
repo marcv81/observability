@@ -1,0 +1,9 @@
+priority_number,priority_text,severity_number
+0,"emerg",24
+1,"alert",23
+2,"crit",22
+3,"err",17
+4,"warning",13
+5,"notice",11
+6,"info",9
+7,"debug",5

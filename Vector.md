@@ -22,6 +22,10 @@ Install the configuration.
 
     sudo cp config/vector/vector.yaml /etc/vector/vector.yaml
 
+Allow the `vector` user to read the Docker socket to collect container logs.
+
+    sudo usermod -a -G docker vector
+
 Start and enable the service.
 
     sudo systemctl restart vector
