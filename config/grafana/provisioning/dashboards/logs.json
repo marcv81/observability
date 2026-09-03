@@ -111,6 +111,7 @@
                       "mode": "off"
                     }
                   },
+                  "min": 0,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
