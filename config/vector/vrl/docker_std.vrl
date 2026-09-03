@@ -1,0 +1,11 @@
+.message = .
+.host = %docker_logs.host
+.timestamp = to_unix_timestamp!(%docker_logs.timestamp, "nanoseconds")
+.scope = %docker_logs.labels."com.docker.compose.service" || "unknown"
+
+.metadata.docker = %docker_logs
+del(.metadata.docker.host)
+del(.metadata.docker.timestamp)
+
+.severity_number = 9
+.severity_text = "info"

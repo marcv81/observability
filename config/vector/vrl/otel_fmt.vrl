@@ -1,0 +1,31 @@
+attributes = []
+for_each(flatten!(.metadata)) -> |key, value| {
+	if is_string(value) {
+		attributes = push(attributes, {"key": key, "value": {"stringValue": value}})
+	} else if is_boolean(value) {
+		attributes = push(attributes, {"key": key, "value": {"boolValue": value}})
+	} else if is_integer(value) {
+		attributes = push(attributes, {"key": key, "value": {"intValue": value}})
+	} else if is_float(value) {
+		attributes = push(attributes, {"key": key, "value": {"doubleValue": value}})
+	}
+}
+
+. = {
+	"resourceLogs": [{
+		"resource": { "attributes": [
+			{"key": "service.name", "value": {"stringValue": "vector"}},
+			{"key": "host.name", "value": {"stringValue": .host}}
+		]},
+		"scopeLogs": [{
+			"scope": {"name": .scope, "version": ""},
+			"logRecords": [{
+				"body": {"stringValue": .message},
+				"severityNumber": .severity_number,
+				"severityText": .severity_text,
+				"timeUnixNano": .timestamp,
+				"attributes": attributes
+			}]
+		}]
+	}]
+}

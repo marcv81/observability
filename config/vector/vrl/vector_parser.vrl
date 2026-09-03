@@ -1,0 +1,15 @@
+r = r'^(?P<timestamp>\S+)\s+(?P<level>\S+)\s+(?P<message>.*)$'
+data = parse_regex!(.message, r)
+
+t = parse_timestamp!(data.timestamp, format: "%+")
+
+row = get_enrichment_table_record!(
+	table: "otel_severity",
+	condition: {"severity_text": data.level},
+	case_sensitive: false,
+)
+
+.message = data.message
+.timestamp = to_unix_timestamp(t, "nanoseconds")
+.severity_number = row.severity_number
+.severity_text = data.level

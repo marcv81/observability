@@ -20,6 +20,10 @@ Install Vector.
 
 Install the configuration.
 
+    sudo mkdir -p /etc/vector/enrichment
+    sudo cp config/vector/enrichment/* /etc/vector/enrichment
+    sudo mkdir -p /etc/vector/vrl
+    sudo cp config/vector/vrl/* /etc/vector/vrl
     sudo cp config/vector/vector.yaml /etc/vector/vector.yaml
 
 Allow the `vector` user to read the Docker socket to collect container logs.

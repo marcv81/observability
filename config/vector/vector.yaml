@@ -43,42 +43,12 @@ transforms:
   journald_std:
     type: remap
     inputs: [journald]
-    source: |
-      .message = .
-      .host = %journald.host
-      .timestamp = to_unix_timestamp!(%journald.timestamp, "nanoseconds")
-      .metadata.journald = %journald.metadata
-
-      .scope = "unknown"
-      if exists(%journald.metadata._SYSTEMD_UNIT) {
-        .scope = %journald.metadata._SYSTEMD_UNIT
-      } else if exists(%journald.metadata._COMM) {
-        .scope = %journald.metadata._COMM
-      }
-
-      priority = to_int(%journald.metadata.PRIORITY) ?? 6
-      row = get_enrichment_table_record!("syslog_priority", {"priority_number": priority})
-      .severity_number = row.severity_number
-      .severity_text = row.priority_text
+    file: /etc/vector/vrl/journald_std.vrl
 
   docker_std:
     type: remap
     inputs: [docker]
-    source: |
-      .message = .
-      .host = %docker_logs.host
-      .timestamp = to_unix_timestamp!(%docker_logs.timestamp, "nanoseconds")
-      .metadata.docker = %docker_logs
-      del(.metadata.docker.host)
-      del(.metadata.docker.timestamp)
-
-      .scope = "unknown"
-      if exists(%docker_logs.labels."com.docker.compose.service") {
-        .scope = %docker_logs.labels."com.docker.compose.service"
-      }
-
-      .severity_number = 9
-      .severity_text = "info"
+    file: /etc/vector/vrl/docker_std.vrl
 
   route:
     type: exclusive_route
@@ -86,61 +56,30 @@ transforms:
     routes:
       - name: vector
         condition: .scope == "vector.service"
+      - name: loki
+        condition: .scope == "loki"
+      - name: grafana
+        condition: .scope == "grafana"
 
   vector_parser:
     type: remap
     inputs: [route.vector]
-    source: |
-      r = r'^(?P<timestamp>\S+)\s+(?P<level>\S+)\s+(?P<message>.*)$'
-      data, err = parse_regex(.message, r)
-      if err == null {
-        t, err = parse_timestamp(data.timestamp,format: "%+")
-        if err == null {
-          row, err = get_enrichment_table_record("otel_severity", {"severity_text": data.level}, case_sensitive: false)
-          if err == null {
-            .message = data.message
-            .timestamp = to_unix_timestamp(t, "nanoseconds")
-            .severity_number = row.severity_number
-            .severity_text = data.level
-          }
-        }
-      }
+    file: /etc/vector/vrl/vector_parser.vrl
+
+  loki_parser:
+    type: remap
+    inputs: [route.loki]
+    file: /etc/vector/vrl/loki_parser.vrl
+
+  grafana_parser:
+    type: remap
+    inputs: [route.grafana]
+    file: /etc/vector/vrl/grafana_parser.vrl
 
   otel_fmt:
     type: remap
-    inputs: [route._unmatched, vector_parser]
-    source: |
-      attributes = []
-      for_each(flatten!(.metadata)) -> |key, value| {
-        if is_string(value) {
-          attributes = push(attributes, {"key": key, "value": {"stringValue": value}})
-        } else if is_boolean(value) {
-          attributes = push(attributes, {"key": key, "value": {"boolValue": value}})
-        } else if is_integer(value) {
-          attributes = push(attributes, {"key": key, "value": {"intValue": value}})
-        } else if is_float(value) {
-          attributes = push(attributes, {"key": key, "value": {"doubleValue": value}})
-        }
-      }
-
-      . = {
-        "resourceLogs": [{
-          "resource": { "attributes": [
-            {"key": "service.name", "value": {"stringValue": "vector"}},
-            {"key": "host.name", "value": {"stringValue": .host}}
-          ]},
-          "scopeLogs": [{
-            "scope": {"name": .scope, "version": ""},
-            "logRecords": [{
-              "body": {"stringValue": .message},
-              "severityNumber": .severity_number,
-              "severityText": .severity_text,
-              "timeUnixNano": .timestamp,
-              "attributes": attributes
-            }]
-          }]
-        }]
-      }
+    inputs: [route._unmatched, vector_parser, loki_parser, grafana_parser]
+    file: /etc/vector/vrl/otel_fmt.vrl
 
 sinks:
   otel:

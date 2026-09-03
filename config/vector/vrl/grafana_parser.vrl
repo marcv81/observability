@@ -1,0 +1,19 @@
+# Remove keys with empty values, they confuse parse_logfmt.
+.message = replace!(.message, r'\S+=\s', "")
+.metadata.grafana = parse_logfmt!(.message)
+
+.message = .metadata.grafana.msg
+del(.metadata.grafana.msg)
+
+t = parse_timestamp!(.metadata.grafana.t, format: "%+")
+.timestamp = to_unix_timestamp(t, "nanoseconds")
+del(.metadata.grafana.t)
+
+row = get_enrichment_table_record!(
+	table: "otel_severity",
+	condition: {"severity_text": .metadata.grafana.level},
+	case_sensitive: false,
+)
+.severity_number = row.severity_number
+.severity_text = .metadata.grafana.level
+del(.metadata.grafana.level)

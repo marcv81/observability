@@ -1,0 +1,11 @@
+.message = .
+.host = %journald.host
+.timestamp = to_unix_timestamp!(%journald.timestamp, "nanoseconds")
+.scope = %journald.metadata._SYSTEMD_UNIT || %journald.metadata._COMM || "unknown"
+
+.metadata.journald = %journald.metadata
+
+priority = to_int(%journald.metadata.PRIORITY) ?? 6
+row = get_enrichment_table_record!("syslog_priority", {"priority_number": priority})
+.severity_number = row.severity_number
+.severity_text = row.priority_text
