@@ -19,7 +19,8 @@ services:
       - "victoria-metrics-data:/victoria-metrics-data"
     restart: "unless-stopped"
     command:
-      - "--retentionPeriod=100y"
+      - "-retentionPeriod=100y"
+      - "-search.latencyOffset=0s"
 
   loki:
     image: "grafana/loki:3.7.6"
