@@ -84,6 +84,7 @@ For my motherboard and case, we have the following sensors.
 
 Install the configuration.
 
+    sudo cp config/telegraf/telegraf.d/* /etc/telegraf/telegraf.d
     sudo cp config/telegraf/telegraf.conf /etc/telegraf/telegraf.conf
 
 Start and enable the service.
