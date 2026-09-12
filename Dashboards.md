@@ -1,5 +1,13 @@
 # Dashboards
 
+## Metrics
+
+Telegraf processes the metrics, making it trivial to implement the dashboard panels. Just select the metrics and labels, then set the legend and the unit.
+
+For the I/O panels, add the following.
+- Use the `Rate` operation with a `10s` interval to compute the data rate from `io_bytes_total`.
+- Apply the `Graph styles > Transform` override with `Negative Y` to plot read/write or send/recv on opposite sides of the X axis.
+
 ## Logs
 
 Create the following variables and default values.
