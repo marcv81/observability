@@ -67,7 +67,7 @@
           "description": "",
           "id": 1,
           "links": [],
-          "title": "New panel",
+          "title": "Volume",
           "vizConfig": {
             "group": "timeseries",
             "kind": "VizConfig",
@@ -349,7 +349,7 @@
           "description": "",
           "id": 2,
           "links": [],
-          "title": "New panel",
+          "title": "Messages",
           "vizConfig": {
             "group": "logs",
             "kind": "VizConfig",
