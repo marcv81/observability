@@ -34,12 +34,23 @@ services:
     image: "otel/opentelemetry-collector-contrib:0.159.0"
     volumes:
       - "./config/otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro"
+    restart: "unless-stopped"
     ports:
       - "127.0.0.1:4317:4317"
       - "127.0.0.1:4318:4318"
+
+  tempo:
+    image: "grafana/tempo:3.0.3"
+    volumes:
+      - "tempo-data:/var/tempo"
+      - "./config/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro"
     restart: "unless-stopped"
+    command:
+      - "-target=all"
+      - "-config.file=/etc/tempo/tempo.yaml"
 
 volumes:
   grafana-data: {}
   victoria-metrics-data: {}
   loki-data: {}
+  tempo-data: {}
