@@ -30,6 +30,11 @@ Allow the `vector` user to read the Docker socket to collect container logs.
 
     sudo usermod -a -G docker vector
 
+When the system shuts down, Vector needs to stop before Docker. If Docker stopped first, Vector would hang trying to flush to a missing `otel-collector`. Create `/etc/systemd/system/vector.service.d/shutdown-order.conf` with the following contents.
+
+    [Unit]
+    After=docker.service
+
 Start and enable the service.
 
     sudo systemctl restart vector
